@@ -106,9 +106,9 @@ public class Videos extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0:
-                    return "ALL VIDEOS";
+                    return "PUBLIC";
                 case 1:
-                    return "ENCRYPTED VIDEOS";
+                    return "PRIVATE";
             }
             return null;
         }
