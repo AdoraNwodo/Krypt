@@ -14,6 +14,7 @@ import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import krypt.com.krypt.utils.MessageToast;
 
 public class SignUp extends AppCompatActivity {
 
@@ -37,7 +38,7 @@ public class SignUp extends AppCompatActivity {
 
         if (!username.isEmpty() && !pin.isEmpty() && !confirmPIN.isEmpty()){
 
-            if (pin.matches("\\d+") && pin.compareTo(confirmPIN) == 0){
+            if (pin.compareTo(confirmPIN) == 0){
                 SharedPreferences preferences = getSharedPreferences(getString(R.string.launch_info), MODE_PRIVATE);
 
                 SharedPreferences.Editor editor = preferences.edit();
@@ -46,21 +47,19 @@ public class SignUp extends AppCompatActivity {
                 editor.putString("pin", pin);
                 editor.apply();
 
-                showSnackBar("Account setup was successful");
+                MessageToast.showSnackBar(this, "Account setup was successful");
                 Intent i = new Intent(SignUp.this, Videos.class);
                 startActivity(i);
                 finish();
             } else {
-                showSnackBar("Pin must be numeric");
+                MessageToast.showSnackBar(this, "PINS must match");
             }
         } else {
-            showSnackBar(getString(R.string.signup_field_condition_text));
+            MessageToast.showSnackBar(this, getString(R.string.signup_field_condition_text));
         }
 
     }
 
-    private void showSnackBar(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
-    }
+
 
 }
