@@ -1,38 +1,66 @@
 package krypt.com.krypt;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class SignUp extends AppCompatActivity {
 
-    Button toLogin, signup;
+
+    @BindView(R.id.username) EditText edtUsername;
+    @BindView(R.id.pin) EditText edtPIN;
+    @BindView(R.id.confirm_pin) EditText edtConfirmPIN;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
+        ButterKnife.bind(this);
+    }
 
-        toLogin = (Button) findViewById(R.id.btnToLogin);
-        signup = (Button) findViewById(R.id.btnSignUp);
+    @OnClick(R.id.btnSignUp)
+    public void onSignupClicked() {
+        String username = edtUsername.getText().toString();
+        String pin = edtPIN.getText().toString();
+        String confirmPIN = edtConfirmPIN.getText().toString();
 
-        toLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent i = new Intent(SignUp.this,MainActivity.class);
+        if (!username.isEmpty() && !pin.isEmpty() && !confirmPIN.isEmpty()){
+
+            if (pin.matches("\\d+") && pin.compareTo(confirmPIN) == 0){
+                SharedPreferences preferences = getSharedPreferences(getString(R.string.launch_info), MODE_PRIVATE);
+
+                SharedPreferences.Editor editor = preferences.edit();
+
+                editor.putString("username", username);
+                editor.putString("pin", pin);
+                editor.apply();
+
+                showSnackBar("Account setup was successful");
+                Intent i = new Intent(SignUp.this, Videos.class);
                 startActivity(i);
+                finish();
+            } else {
+                showSnackBar("Pin must be numeric");
             }
-        });
+        } else {
+            showSnackBar(getString(R.string.signup_field_condition_text));
+        }
 
-        signup.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(getApplicationContext(),"You pressed signup", Toast.LENGTH_SHORT).show();
-            }
-        });
+    }
+
+    private void showSnackBar(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
 }

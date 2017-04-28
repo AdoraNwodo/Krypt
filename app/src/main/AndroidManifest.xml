@@ -9,12 +9,12 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
+            android:name=".LoginActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".SignUp"
-            android:label="@string/title_activity_sign_up"
+            android:label="@string/title_activity_sign_up"  android:background="#039be5"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".Splash"
@@ -33,7 +33,7 @@
         <activity
             android:name=".Videos"
             android:label="@string/title_activity_videos"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar"/>
     </application>
 
 </manifest>

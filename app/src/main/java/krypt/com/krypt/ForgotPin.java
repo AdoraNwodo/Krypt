@@ -22,7 +22,7 @@ public class ForgotPin extends AppCompatActivity {
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(ForgotPin.this,MainActivity.class);
+                Intent i = new Intent(ForgotPin.this,LoginActivity.class);
                 startActivity(i);
             }
         });

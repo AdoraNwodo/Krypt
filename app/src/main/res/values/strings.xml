@@ -9,9 +9,11 @@
     <string name="btn_link_to_login">Got a Pin? Login!</string>
     <string name="btn_forgot_password">Forgot your pin?</string>
     <string name="title_activity_sign_up">SignUp</string>
-    <string name="title_activity_splash">Splash</string>
+    <string name="title_activity_splash">Krypt</string>
     <string name="title_activity_forgot_pin">ForgotPin</string>
     <string name="title_activity_videos">Krypt</string>
+    <string name="launch_info">launch_info</string>
+    <string name="signup_field_condition_text">All fields must be filled</string>
 
 
 </resources>

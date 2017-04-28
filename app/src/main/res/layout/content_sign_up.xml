@@ -26,13 +26,13 @@
             />
 
         <EditText
-            android:id="@+id/email"
+            android:id="@+id/username"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
             android:background="@color/white"
             android:hint="@string/hint_email"
-            android:inputType="textEmailAddress"
+            android:inputType="text"
             android:padding="10dp"
             android:textColor="@color/input_login"
             android:textColorHint="@color/input_login_hint" />
@@ -45,6 +45,7 @@
             android:background="@color/white"
             android:hint="@string/hint_pin"
             android:inputType="numberPassword"
+            android:maxLength="4"
             android:padding="10dp"
             android:textColor="@color/input_login"
             android:textColorHint="@color/input_login_hint" />
@@ -57,6 +58,7 @@
             android:background="@color/white"
             android:hint="@string/hint_confirm_pin"
             android:inputType="numberPassword"
+            android:maxLength="4"
             android:padding="10dp"
             android:textColor="@color/input_login"
             android:textColorHint="@color/input_login_hint" />
@@ -70,16 +72,6 @@
             android:text="Sign up"
             android:textColor="@color/white" />
 
-        <Button
-            android:id="@+id/btnToLogin"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="40dip"
-            android:background="@null"
-            android:text="@string/btn_link_to_login"
-            android:textAllCaps="false"
-            android:textColor="@color/white"
-            android:textSize="15dp" />
     </LinearLayout>
 
 </LinearLayout>
