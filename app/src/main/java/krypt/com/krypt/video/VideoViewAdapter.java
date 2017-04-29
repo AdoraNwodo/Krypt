@@ -3,7 +3,7 @@ package krypt.com.krypt.video;
 import android.content.Context;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
-import android.util.DisplayMetrics;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +11,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import java.io.File;
 import java.util.List;
@@ -28,10 +27,12 @@ public class VideoViewAdapter extends RecyclerView.Adapter<VideoViewAdapter.Vide
 
     private List<Video>videos;
     private Context context;
+    private OnClickVideoListener onClickVideoListener;
 
-    public VideoViewAdapter(Context context, List<Video> videos) {
+    public VideoViewAdapter(Context context, OnClickVideoListener onClickVideoListener, List<Video> videos) {
         this.videos = videos;
         this.context = context;
+        this.onClickVideoListener = onClickVideoListener;
     }
 
     @Override
@@ -57,7 +58,7 @@ public class VideoViewAdapter extends RecyclerView.Adapter<VideoViewAdapter.Vide
     }
 
 
-    class VideoViewHolder extends RecyclerView.ViewHolder {
+    class VideoViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         @BindView(R.id.video_thumb)
         ImageView videoThumb;
@@ -67,7 +68,14 @@ public class VideoViewAdapter extends RecyclerView.Adapter<VideoViewAdapter.Vide
 
         VideoViewHolder(View itemView) {
             super(itemView);
+            itemView.setOnClickListener(this);
             ButterKnife.bind(this, itemView);
+        }
+
+
+        @Override
+        public void onClick(View v) {
+            VideoViewAdapter.this.onClickVideoListener.play(videos.get(getAdapterPosition()));
         }
     }
 

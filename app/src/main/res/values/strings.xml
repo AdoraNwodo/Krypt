@@ -15,5 +15,9 @@
     <string name="launch_info">launch_info</string>
     <string name="signup_field_condition_text">All fields must be filled</string>
 
+    <string name="title_activity_video_player">VideoPlayerActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+
 
 </resources>

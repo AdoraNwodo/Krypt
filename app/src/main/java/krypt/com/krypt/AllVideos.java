@@ -2,6 +2,7 @@ package krypt.com.krypt;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -19,10 +20,11 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import krypt.com.krypt.video.OnClickVideoListener;
 import krypt.com.krypt.video.Video;
 import krypt.com.krypt.video.VideoViewAdapter;
 
-public class AllVideos extends Fragment {
+public class AllVideos extends Fragment implements OnClickVideoListener{
 
     @BindView(R.id.videos)
     RecyclerView videosView;
@@ -42,7 +44,7 @@ public class AllVideos extends Fragment {
         super.onStart();
 
         List<Video> videos = getPublicVideos();
-        VideoViewAdapter videoViewAdapter = new VideoViewAdapter(getContext(), videos);
+        VideoViewAdapter videoViewAdapter = new VideoViewAdapter(getContext(), this, videos);
 
         videosView.setAdapter(videoViewAdapter);
         videosView.setLayoutManager(new GridLayoutManager(getContext(), calculateNoOfColumns(getContext())));
@@ -97,4 +99,10 @@ public class AllVideos extends Fragment {
         return  (int) (dpWidth / 180);
     }
 
+    @Override
+    public void play(Video video) {
+        Intent i = new Intent(getContext(), VideoPlayerActivity.class);
+        i.putExtra("path", video.getPath());
+        startActivity(i);
+    }
 }
