@@ -1,15 +1,25 @@
 package krypt.com.krypt;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -22,6 +32,8 @@ public class SignUp extends AppCompatActivity {
     @BindView(R.id.username) EditText edtUsername;
     @BindView(R.id.pin) EditText edtPIN;
     @BindView(R.id.confirm_pin) EditText edtConfirmPIN;
+
+    public static final String APPLICATION_DIR = "krypt";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,8 +57,8 @@ public class SignUp extends AppCompatActivity {
 
                 editor.putString("username", username);
                 editor.putString("pin", pin);
-                editor.apply();
 
+                editor.apply();
                 MessageToast.showSnackBar(this, "Account setup was successful");
                 Intent i = new Intent(SignUp.this, Videos.class);
                 startActivity(i);
@@ -59,7 +71,6 @@ public class SignUp extends AppCompatActivity {
         }
 
     }
-
 
 
 }

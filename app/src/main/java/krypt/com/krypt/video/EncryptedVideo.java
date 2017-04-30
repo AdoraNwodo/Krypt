@@ -10,7 +10,7 @@ import io.realm.annotations.PrimaryKey;
 public class EncryptedVideo extends RealmObject {
 
     @PrimaryKey
-    private Long objectId;
+    private long id;
 
     private String originalPath;
 
@@ -20,5 +20,13 @@ public class EncryptedVideo extends RealmObject {
 
     public String getOriginalPath() {
         return originalPath;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 }

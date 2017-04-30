@@ -11,6 +11,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
+
 public class Videos extends AppCompatActivity {
 
     /**
@@ -37,6 +40,8 @@ public class Videos extends AppCompatActivity {
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
