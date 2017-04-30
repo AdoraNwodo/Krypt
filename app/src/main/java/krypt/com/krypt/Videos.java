@@ -28,13 +28,16 @@ public class Videos extends AppCompatActivity {
      */
     private ViewPager mViewPager;
 
+    private Toolbar toolbar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_videos);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
@@ -112,5 +115,9 @@ public class Videos extends AppCompatActivity {
             }
             return null;
         }
+    }
+
+    public Toolbar getToolbar() {
+        return toolbar;
     }
 }

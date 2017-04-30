@@ -40,6 +40,7 @@
             android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
+            android:theme="@style/AppTheme.NoActionBar"
             android:name=".VideoPlayerActivity"
             android:screenOrientation="landscape"
             android:label="@string/title_activity_video_player" />
