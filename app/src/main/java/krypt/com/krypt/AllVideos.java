@@ -57,7 +57,7 @@ public class AllVideos extends Fragment implements VideoEvent.VideoActionListene
 
     VideoEncryptionHandler handler;
 
-    private boolean widgetAdded;
+    private boolean widgetAdded, encrypting;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -194,21 +194,23 @@ public class AllVideos extends Fragment implements VideoEvent.VideoActionListene
 
     @Override
     public void onClick(View v) {
-        final VideoEncryptionHandler handler = VideoEncryptionHandler.newInstance();
+        if (!encrypting) {
+            final VideoEncryptionHandler handler = VideoEncryptionHandler.newInstance();
 
 
+            for (Video vid : selectedVideos) {
+                selectedVideosMap.put(vid.getPath(), vid);
+            }
 
-        for (Video vid: selectedVideos) {
-            selectedVideosMap.put(vid.getPath(), vid);
-        }
-
-        try {
-            handler.encypt(new TreeSet<>(selectedVideos));
-        } catch (IOException e) {
-            MessageToast.showSnackBar(getContext(), e.getMessage());
-        } catch (VideoEncryptionException e){
-            MessageToast.showSnackBar(getContext(), "Error occurred from encryption library");
-            e.printStackTrace();
+            try {
+                handler.encypt(new TreeSet<>(selectedVideos));
+                this.encrypting = false;
+            } catch (IOException e) {
+                MessageToast.showSnackBar(getContext(), e.getMessage());
+            } catch (VideoEncryptionException e) {
+                MessageToast.showSnackBar(getContext(), "Error occurred from encryption library");
+                e.printStackTrace();
+            }
         }
     }
 

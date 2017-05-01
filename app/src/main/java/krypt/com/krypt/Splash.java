@@ -8,7 +8,6 @@ import android.support.v7.app.AppCompatActivity;
 public class Splash extends AppCompatActivity {
 
     private static final String USERNAME = "username";
-    private static final String PIN = "pin";
     private static final int SLEEP_TIME = 2000;
 
     @Override
