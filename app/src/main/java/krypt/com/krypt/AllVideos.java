@@ -4,9 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -15,9 +14,12 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ProgressBar;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,7 +43,7 @@ import krypt.com.krypt.video.VideoEncryptionHandler;
 import krypt.com.krypt.video.VideoEvent;
 import krypt.com.krypt.video.VideoViewAdapter;
 
-public class AllVideos extends Fragment implements VideoEvent.VideoActionListener, View.OnClickListener, VideoEncryptionHandler.EncryptionHandler {
+public class AllVideos extends Fragment implements VideoEvent.VideoActionListener, VideoEncryptionHandler.EncryptionHandler {
 
     @BindView(R.id.videos)
     RecyclerView videosView;
@@ -53,11 +55,20 @@ public class AllVideos extends Fragment implements VideoEvent.VideoActionListene
 
     Toolbar toolbar;
 
+    @BindView(R.id.progress_bar)
+    ProgressBar progressBar;
+
     VideoViewAdapter videoViewAdapter;
 
     VideoEncryptionHandler handler;
 
-    private boolean widgetAdded, encrypting;
+    MenuItem encryptAction;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -92,6 +103,28 @@ public class AllVideos extends Fragment implements VideoEvent.VideoActionListene
 
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_videos2, menu);
+        this.encryptAction = menu.findItem(R.id.encrypt_action);
+        this.encryptAction.setVisible(false);
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if (item.getItemId() == R.id.encrypt_action) {
+            this.progressBar.setVisibility(View.VISIBLE);
+            this.encryptAction.setVisible(false);
+            this.encrypt();
+
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
     public List<Video> getPublicVideos() {
         List<String> externalVideos = getExternalVideos();
         List<String> internalVideos = getInternalVideos();
@@ -102,7 +135,7 @@ public class AllVideos extends Fragment implements VideoEvent.VideoActionListene
 
         RealmResults<EncryptedVideo> encryptedVideos = realm.where(EncryptedVideo.class).findAll();
         Set<String> encryptedPath = new HashSet<>();
-        for(EncryptedVideo encryptedVideo: encryptedVideos){
+        for (EncryptedVideo encryptedVideo : encryptedVideos) {
             encryptedPath.add(encryptedVideo.getOriginalPath());
         }
 
@@ -168,13 +201,7 @@ public class AllVideos extends Fragment implements VideoEvent.VideoActionListene
             selectedVideos.add(video);
         }
 
-        if (!widgetAdded) {
-            Button button = new Button(getContext());
-            button.setText("Encrypt");
-            button.setOnClickListener(this);
-            toolbar.addView(button);
-            widgetAdded = true;
-        }
+        this.encryptAction.setVisible(true);
 
     }
 
@@ -184,34 +211,13 @@ public class AllVideos extends Fragment implements VideoEvent.VideoActionListene
             selectedVideos.remove(video);
         }
 
-        if (widgetAdded) {
-            if (selectedVideos.size() == 0) {
-                toolbar.removeAllViews();
-                widgetAdded = false;
-            }
+        if (selectedVideos.size() == 0) {
+            this.encryptAction.setVisible(false);
         }
     }
 
-    @Override
-    public void onClick(View v) {
-        if (!encrypting) {
-            final VideoEncryptionHandler handler = VideoEncryptionHandler.newInstance();
-
-
-            for (Video vid : selectedVideos) {
-                selectedVideosMap.put(vid.getPath(), vid);
-            }
-
-            try {
-                handler.encypt(new TreeSet<>(selectedVideos));
-                this.encrypting = false;
-            } catch (IOException e) {
-                MessageToast.showSnackBar(getContext(), e.getMessage());
-            } catch (VideoEncryptionException e) {
-                MessageToast.showSnackBar(getContext(), "Error occurred from encryption library");
-                e.printStackTrace();
-            }
-        }
+    public void encrypt() {
+        new EncryptionTask(selectedVideos).execute();
     }
 
     @Override
@@ -229,11 +235,56 @@ public class AllVideos extends Fragment implements VideoEvent.VideoActionListene
         }
 
         MessageToast.showSnackBar(getContext(), "Video was encrypted successfully");
+        this.progressBar.setVisibility(View.GONE);
     }
 
     @Override
     public void onVideoDecrypted(Video video) {
         video.setSerialNumber(selectedVideos.size());
         videoViewAdapter.addVideo(video);
+    }
+
+    public class EncryptionTask extends AsyncTask<Void, Void, List<EncryptedVideo>> {
+
+        VideoEncryptionHandler handler;
+        private Set<Video> videos;
+
+        public EncryptionTask(Set<Video> videos) {
+            handler = VideoEncryptionHandler.newInstance();
+            this.videos = videos;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+            for (Video vid : selectedVideos) {
+                selectedVideosMap.put(vid.getPath(), vid);
+            }
+        }
+
+        @Override
+        protected List<EncryptedVideo> doInBackground(Void... params) {
+            List<EncryptedVideo> encryptedVideos = new ArrayList<>();
+
+            try {
+                encryptedVideos = handler.encypt(new TreeSet<>(videos));
+            } catch (IOException e) {
+                MessageToast.showSnackBar(getContext(), e.getMessage());
+            } catch (VideoEncryptionException e) {
+                MessageToast.showSnackBar(getContext(), "Error occurred from encryption library");
+                e.printStackTrace();
+            }
+            return encryptedVideos;
+        }
+
+        @Override
+        protected void onPostExecute(List<EncryptedVideo> encryptedVideos) {
+            for (EncryptedVideo v: encryptedVideos) {
+                for (VideoEncryptionHandler.EncryptionHandler e : handler.getRegisteredObservers()) {
+                    e.onVideoEncrypted(v);
+                }
+            }
+        }
     }
 }

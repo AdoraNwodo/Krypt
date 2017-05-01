@@ -1,6 +1,9 @@
 package krypt.com.krypt;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -9,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -71,7 +75,32 @@ public class EncryptedVideos extends Fragment implements VideoEvent.EncryptedVid
 
     @Override
     public void onPlayClicked(EncryptedVideo encryptedVideo) {
+        VideoEncryptionHandler handler = VideoEncryptionHandler.newInstance();
+        try {
+            String kryptDirectory = handler.getKryptifiedDirectory();
+            File currentFile = getContext().getDir("temp", Context.MODE_PRIVATE);
 
+            String path = currentFile.getAbsolutePath();
+
+            if (path.endsWith("/")){
+                path = path.concat("temp.run");
+            } else {
+                path = path.concat("/temp.run");
+            }
+
+            FileInputStream source = new FileInputStream(kryptDirectory + "/" + encryptedVideo.getId() + ".enc");
+            FileOutputStream destination =  new FileOutputStream(new File(path));
+
+            handler.decrypt(source, destination);
+            destination.flush();
+            destination.close();
+
+            Intent i = new Intent(getContext(), VideoPlayerActivity.class);
+            i.putExtra("path", path);
+            startActivity(i);
+        } catch (Exception e){
+            MessageToast.showSnackBar(getContext(), e.getMessage());
+        }
     }
 
     @Override

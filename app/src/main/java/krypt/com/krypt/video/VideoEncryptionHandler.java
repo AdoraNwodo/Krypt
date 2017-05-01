@@ -78,9 +78,7 @@ public class VideoEncryptionHandler {
 
             realm.commitTransaction();
             encryptedVideos.add(enc);
-            for (EncryptionHandler e : this.encryptionObservers) {
-                e.onVideoEncrypted(enc);
-            }
+
             // TODO Delete file from user path
         }
         return encryptedVideos;
@@ -128,7 +126,7 @@ public class VideoEncryptionHandler {
         destination.close();
     }
 
-    private void decrypt(FileInputStream source, FileOutputStream destination) throws Exception {
+    public void decrypt(FileInputStream source, FileOutputStream destination) throws Exception {
         byte[] k = "iqwfbjcfbbvcbmvb".getBytes();
         SecretKeySpec key = new SecretKeySpec(k, "AES");
         Cipher cipher = Cipher.getInstance("AES");
@@ -184,5 +182,9 @@ public class VideoEncryptionHandler {
     public interface EncryptionHandler {
         void onVideoEncrypted(EncryptedVideo encryptedVideo);
         void onVideoDecrypted(Video video);
+    }
+
+    public List<EncryptionHandler> getRegisteredObservers() {
+        return this.encryptionObservers;
     }
 }

@@ -1,34 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/cont_item_root"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="4dp">
+    android:layout_height="72dp"
+    android:clickable="true">
+
+    <ImageView
+        android:id="@+id/play_video"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:paddingLeft="16dp"
+        android:src="@android:drawable/ic_media_play" />
 
     <TextView
-        android:layout_gravity="center"
         android:id="@+id/video_name"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:textSize="20sp" />
+        android:layout_alignTop="@id/play_video"
+        android:layout_marginLeft="72dp"
+        android:layout_marginRight="48dp"
+        android:ellipsize="end"
+        android:fontFamily="sans-serif"
+        android:text="Video's name"
+        android:textColor="@android:color/black"
+        android:textSize="16sp" />
 
+    <TextView
+        android:id="@+id/date_encrypted"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/video_name"
+        android:layout_marginLeft="72dp"
+        android:layout_marginRight="48dp"
+        android:ellipsize="end"
+        android:fontFamily="sans-serif"
+        android:singleLine="true"
+        android:text="Description"
+        android:textSize="14sp" />
 
-    <LinearLayout
+    <ImageView
+
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:clickable="true"
+        android:padding="16dp"
+        android:src="@android:drawable/ic_delete" />
 
-        <ImageButton
-            android:id="@+id/play_video"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@android:drawable/ic_media_play" />
+    <ImageView
+        android:id="@+id/decrypt_video"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="60dp"
+        android:clickable="true"
+        android:src="@android:drawable/ic_lock_lock" />
 
-        <ImageButton
-            android:id="@+id/decrypt_video"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@android:drawable/ic_lock_lock" />
-    </LinearLayout>
-
-</LinearLayout>
+</RelativeLayout>

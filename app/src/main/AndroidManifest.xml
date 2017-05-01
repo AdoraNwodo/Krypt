@@ -22,9 +22,11 @@
             android:label="@string/title_activity_sign_up"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.NoTitle"
             android:name=".Splash"
-            android:label="@string/title_activity_splash"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:label="@string/title_activity_splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

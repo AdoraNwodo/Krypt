@@ -3,8 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="krypt.com.krypt.Videos2">
     <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="100"
-        android:title="@string/action_settings"
-        app:showAsAction="never" />
+        android:id="@+id/encrypt_action"
+        android:icon="@android:drawable/ic_lock_idle_lock"
+        android:orderInCategory="10"
+        android:title="Encrypt"
+        app:showAsAction="always" />
 </menu>

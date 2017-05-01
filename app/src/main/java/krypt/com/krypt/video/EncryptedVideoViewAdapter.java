@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -64,12 +65,6 @@ public class EncryptedVideoViewAdapter extends RecyclerView.Adapter<EncryptedVid
         @BindView(R.id.video_name)
         TextView videoName;
 
-        @BindView(R.id.play_video)
-        ImageButton playVideo;
-
-        @BindView(R.id.decrypt_video)
-        ImageButton decryptVideo;
-
         public EncryptedVideoViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
@@ -81,6 +76,11 @@ public class EncryptedVideoViewAdapter extends RecyclerView.Adapter<EncryptedVid
             encryptedVideoActionListener.onDecryptClicked(encryptedVideos.get(pos));
             encryptedVideos.remove(pos);
             notifyItemRemoved(pos);
+        }
+
+        @OnClick(R.id.play_video)
+        public void playVideo() {
+            encryptedVideoActionListener.onPlayClicked(encryptedVideos.get(getAdapterPosition()));
         }
 
 
