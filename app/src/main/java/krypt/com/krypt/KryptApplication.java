@@ -1,6 +1,11 @@
 package krypt.com.krypt;
 
 import android.app.Application;
+import android.os.Build;
+import android.os.Environment;
+
+import java.io.File;
+import java.io.IOException;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;

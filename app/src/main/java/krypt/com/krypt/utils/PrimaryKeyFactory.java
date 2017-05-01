@@ -13,6 +13,7 @@ import io.realm.RealmSchema;
 import static java.lang.String.format;
 
 /**
+ * @author hackean, primary key generation factory, code from github, realm does not support auto increment
  * Created by zacheusz on 16/03/16.
  * https://github.com/realm/realm-java/issues/469#issuecomment-196798253
  */

@@ -9,54 +9,59 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
-import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.Toast;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.realm.Realm;
 import krypt.com.krypt.utils.MessageToast;
-import krypt.com.krypt.utils.PrimaryKeyFactory;
 import krypt.com.krypt.video.EncryptedVideo;
 import krypt.com.krypt.video.Video;
+import krypt.com.krypt.video.VideoEncryptionException;
+import krypt.com.krypt.video.VideoEncryptionHandler;
 import krypt.com.krypt.video.VideoEvent;
 import krypt.com.krypt.video.VideoViewAdapter;
 
-public class AllVideos extends Fragment implements VideoEvent.VideoActionListener, View.OnClickListener {
+public class AllVideos extends Fragment implements VideoEvent.VideoActionListener, View.OnClickListener, VideoEncryptionHandler.EncryptionHandler {
 
     @BindView(R.id.videos)
     RecyclerView videosView;
 
     Set<Video> selectedVideos = new TreeSet<>();
+    Map<String, Video> selectedVideosMap = new HashMap<>();
 
     Videos mActivity;
 
     Toolbar toolbar;
+
+    VideoViewAdapter videoViewAdapter;
+
+    VideoEncryptionHandler handler;
 
     private boolean widgetAdded;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        handler = VideoEncryptionHandler.newInstance();
+
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.all_videos, container, false);
         ButterKnife.bind(this, view);
@@ -74,8 +79,9 @@ public class AllVideos extends Fragment implements VideoEvent.VideoActionListene
     public void onStart() {
         super.onStart();
 
+        handler.register(this);
         List<Video> videos = getPublicVideos();
-        VideoViewAdapter videoViewAdapter = new VideoViewAdapter(getContext(), this, videos);
+        videoViewAdapter = new VideoViewAdapter(getContext(), this, videos);
 
         videosView.setAdapter(videoViewAdapter);
         videosView.setLayoutManager(new GridLayoutManager(getContext(), calculateNoOfColumns(getContext())));
@@ -169,87 +175,43 @@ public class AllVideos extends Fragment implements VideoEvent.VideoActionListene
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     public void onClick(View v) {
+        final VideoEncryptionHandler handler = VideoEncryptionHandler.newInstance();
 
-        List<Integer> myVideos = new ArrayList<>();
-
-        for (Video vid : selectedVideos) {
-            myVideos.add(vid.getSerialNumber());
+        for (Video vid: selectedVideos) {
+            selectedVideosMap.put(vid.getPath(), vid);
         }
 
-        encypt(selectedVideos);
-
-    }
-
-    /* Checks if external storage is available to at least read */
-    public boolean isExternalStorageReadable() {
-        String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state) ||
-                Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-            return true;
+        try {
+            handler.encypt(new TreeSet<>(selectedVideos));
+        } catch (IOException e) {
+            MessageToast.showSnackBar(getContext(), e.getMessage());
+        } catch (VideoEncryptionException e){
+            MessageToast.showSnackBar(getContext(), "Error occurred from encryption library");
+            e.printStackTrace();
         }
-        return false;
     }
 
-    public boolean isExternalStorageWritable() {
-        String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            return true;
-        }
-        return false;
-    }
-
-    public EncryptedVideo encypt(Set<Video> videos) {
-        for (Video v : videos) {
-            Realm realm = Realm.getDefaultInstance();
-
-            realm.beginTransaction();
-            EncryptedVideo enc = new EncryptedVideo();
-            enc.setId(PrimaryKeyFactory.getInstance().nextKey(EncryptedVideo.class));
-            enc.setOriginalPath(v.getPath());
-            realm.copyToRealm(enc);
-
-            try {
-                String directory = getKryptifiedDirectory();
-                File file = new File(directory
-                                        .concat("/")
-                                        .concat(String.valueOf(enc.getId()))
-                                        .concat(".enc"));
-                FileOutputStream fos = new FileOutputStream(file);
-                fos.write("Hello World".getBytes());
-                realm.commitTransaction();
-            } catch (IOException e) {
-                MessageToast.showSnackBar(getContext(), e.getMessage());
+    @Override
+    public void onVideoEncrypted(EncryptedVideo encryptedVideo) {
+        Video vid = selectedVideosMap.get(encryptedVideo.getOriginalPath());
+        selectedVideos.remove(vid);
+        if (selectedVideos.size() < 1) {
+            videoViewAdapter.setVideos(new ArrayList<Video>());
+            File videoFile = new File(vid.getPath());
+            if (!videoFile.delete()) {
+                MessageToast.showSnackBar(getContext(), "Couldn't delete " + videoFile.getAbsoluteFile());
             }
+            videoViewAdapter.setVideos(getPublicVideos());
         }
-        return null;
+
+        MessageToast.showSnackBar(getContext(), "Video was encrypted successfully");
     }
 
-    public String getKryptifiedDirectory() throws IOException {
-        if (isExternalStorageWritable()) {
-
-            File file;
-
-            if (Build.VERSION.SDK_INT >= 19) {
-                file = new File(Environment
-                        .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
-                        .getAbsoluteFile() + "/kryptified");
-            } else {
-                file = new File(Environment
-                        .getExternalStorageDirectory()
-                        .getAbsoluteFile() + "/Documents" + "/kryptified");
-            }
-
-            if (!file.exists()) {
-                if (!file.mkdir()) {
-                    throw new IOException("Couldn't create file encryption directory");
-                }
-            }
-            return file.getAbsolutePath();
-        } else {
-            throw new IOException("External Storage not found");
-        }
+    @Override
+    public void onVideoDecrypted(Video video) {
+        video.setSerialNumber(selectedVideos.size());
+        videoViewAdapter.addVideo(video);
     }
 }

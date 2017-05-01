@@ -13,4 +13,9 @@ public class VideoEvent {
         void onVideoDeselected(Video video);
 
     }
+
+    public interface EncryptedVideoActionListener {
+        void onPlayClicked(EncryptedVideo encryptedVideo);
+        void onDecryptClicked(EncryptedVideo encryptedVideo);
+    }
 }

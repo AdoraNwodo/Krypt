@@ -8,10 +8,10 @@ import android.support.annotation.NonNull;
 
 public class Video implements Comparable<Video>{
 
-    private int serialNumber;
+    private Integer serialNumber;
     private String path;
 
-    public Video(String path, int serialNumber) {
+    public Video(String path, Integer serialNumber) {
         this.path = path;
         this.serialNumber = serialNumber;
     }

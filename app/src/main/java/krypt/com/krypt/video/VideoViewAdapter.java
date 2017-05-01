@@ -68,6 +68,17 @@ public class VideoViewAdapter extends RecyclerView.Adapter<VideoViewAdapter.Vide
                 .into(holder.videoThumb);
     }
 
+    public void addVideo(Video video) {
+        int pos = videos.size();
+        videos.add(video);
+        notifyItemInserted(pos);
+    }
+
+    public void setVideos(List<Video> videos) {
+        this.videos = videos;
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getItemCount() {
         return videos.size();
@@ -124,10 +135,8 @@ public class VideoViewAdapter extends RecyclerView.Adapter<VideoViewAdapter.Vide
                 this.setIsRecyclable(false);
             }
 
-            videoActionListener.onVideoSelected(videos.get(getAdapterPosition()));
+            videoActionListener.onVideoSelected(videos.get(position));
             return true;
         }
     }
-
-
 }
