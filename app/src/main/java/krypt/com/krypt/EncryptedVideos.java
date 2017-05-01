@@ -23,6 +23,7 @@ import krypt.com.krypt.utils.MessageToast;
 import krypt.com.krypt.video.EncryptedVideo;
 import krypt.com.krypt.video.EncryptedVideoViewAdapter;
 import krypt.com.krypt.video.Video;
+import krypt.com.krypt.video.VideoEncryptionException;
 import krypt.com.krypt.video.VideoEncryptionHandler;
 import krypt.com.krypt.video.VideoEvent;
 
@@ -34,6 +35,8 @@ public class EncryptedVideos extends Fragment implements VideoEvent.EncryptedVid
     EncryptedVideoViewAdapter adapter;
 
     VideoEncryptionHandler handler;
+
+    EncryptedVideo currentlyEncryptedVideo;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -77,11 +80,15 @@ public class EncryptedVideos extends Fragment implements VideoEvent.EncryptedVid
             handler.decrypt(encryptedVideo);
         } catch (IOException e){
             MessageToast.showSnackBar(getContext(), e.getMessage());
+        } catch (VideoEncryptionException e){
+            MessageToast.showSnackBar(getContext(), "Error occurred from encryption library");
+            e.printStackTrace();
         }
     }
 
     @Override
     public void onVideoEncrypted(EncryptedVideo encryptedVideo) {
+        currentlyEncryptedVideo = encryptedVideo;
         adapter.addEncryptedVideo(encryptedVideo);
     }
 

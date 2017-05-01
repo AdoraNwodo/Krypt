@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,6 +31,8 @@ import java.util.TreeSet;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.realm.Realm;
+import io.realm.RealmResults;
 import krypt.com.krypt.utils.MessageToast;
 import krypt.com.krypt.video.EncryptedVideo;
 import krypt.com.krypt.video.Video;
@@ -94,15 +97,29 @@ public class AllVideos extends Fragment implements VideoEvent.VideoActionListene
         List<String> internalVideos = getInternalVideos();
 
         List<Video> videos = new ArrayList<>();
+
+        Realm realm = Realm.getDefaultInstance();
+
+        RealmResults<EncryptedVideo> encryptedVideos = realm.where(EncryptedVideo.class).findAll();
+        Set<String> encryptedPath = new HashSet<>();
+        for(EncryptedVideo encryptedVideo: encryptedVideos){
+            encryptedPath.add(encryptedVideo.getOriginalPath());
+        }
+
         int i = 0;
         for (String video : externalVideos) {
-            videos.add(new Video(video, i));
-            i++;
+            if (!encryptedPath.contains(video)) {
+                videos.add(new Video(video, i));
+                i++;
+            }
+
         }
 
         for (String video : internalVideos) {
-            videos.add(new Video(video, i));
-            i++;
+            if (!encryptedPath.contains(video)) {
+                videos.add(new Video(video, i));
+                i++;
+            }
         }
 
         return videos;
@@ -179,6 +196,8 @@ public class AllVideos extends Fragment implements VideoEvent.VideoActionListene
     public void onClick(View v) {
         final VideoEncryptionHandler handler = VideoEncryptionHandler.newInstance();
 
+
+
         for (Video vid: selectedVideos) {
             selectedVideosMap.put(vid.getPath(), vid);
         }
@@ -198,7 +217,8 @@ public class AllVideos extends Fragment implements VideoEvent.VideoActionListene
         Video vid = selectedVideosMap.get(encryptedVideo.getOriginalPath());
         selectedVideos.remove(vid);
         if (selectedVideos.size() < 1) {
-            videoViewAdapter.setVideos(new ArrayList<Video>());
+            videoViewAdapter = new VideoViewAdapter(getContext(), this, new ArrayList<Video>());
+            videosView.setAdapter(videoViewAdapter);
             File videoFile = new File(vid.getPath());
             if (!videoFile.delete()) {
                 MessageToast.showSnackBar(getContext(), "Couldn't delete " + videoFile.getAbsoluteFile());

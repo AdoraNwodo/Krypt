@@ -80,6 +80,7 @@ public class EncryptedVideoViewAdapter extends RecyclerView.Adapter<EncryptedVid
             int pos = getAdapterPosition();
             encryptedVideoActionListener.onDecryptClicked(encryptedVideos.get(pos));
             encryptedVideos.remove(pos);
+            notifyItemRemoved(pos);
         }
 
 

@@ -16,6 +16,8 @@ import javax.crypto.CipherOutputStream;
 import javax.crypto.spec.SecretKeySpec;
 
 import io.realm.Realm;
+import io.realm.RealmQuery;
+import io.realm.RealmResults;
 import krypt.com.krypt.utils.PrimaryKeyFactory;
 
 /**
@@ -66,7 +68,7 @@ public class VideoEncryptionHandler {
 
             try {
                 encrypt(fis, fos);
-            } catch (Exception e){
+            } catch (Exception e) {
                 realm.close();
                 throw new VideoEncryptionException(e);
             } finally {
@@ -84,12 +86,26 @@ public class VideoEncryptionHandler {
         return encryptedVideos;
     }
 
-    public void decrypt(EncryptedVideo encryptedVideo) throws IOException {
+    public void decrypt(EncryptedVideo encryptedVideo) throws IOException, VideoEncryptionException {
         String encryptedFile = getKryptifiedDirectory() + "/" + encryptedVideo.getId() + ".enc";
         FileInputStream fis = new FileInputStream(encryptedFile);
         FileOutputStream fos = new FileOutputStream(encryptedVideo.getOriginalPath());
-        VideoEncryptionHandler.newInstance().decrypt(fis, fos);
+        try {
+            decrypt(fis, fos);
+        } catch (Exception e) {
+            throw new VideoEncryptionException(e);
+        } finally {
+            fis.close();
+            fos.close();
+        }
+
         Video video = new Video(encryptedVideo.getOriginalPath(), null);
+        Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
+        EncryptedVideo query = realm.where(EncryptedVideo.class).equalTo("id", encryptedVideo.getId()).findFirst();
+        query.deleteFromRealm();
+        realm.commitTransaction();
+
         for (EncryptionHandler e : this.encryptionObservers) {
             e.onVideoDecrypted(video);
         }
@@ -112,8 +128,20 @@ public class VideoEncryptionHandler {
         destination.close();
     }
 
-    private void decrypt(FileInputStream source, FileOutputStream destination) {
-
+    private void decrypt(FileInputStream source, FileOutputStream destination) throws Exception {
+        byte[] k = "iqwfbjcfbbvcbmvb".getBytes();
+        SecretKeySpec key = new SecretKeySpec(k, "AES");
+        Cipher cipher = Cipher.getInstance("AES");
+        cipher.init(Cipher.DECRYPT_MODE, key);
+        CipherOutputStream cos = new CipherOutputStream(destination, cipher);
+        byte[] buf = new byte[1024];
+        int read;
+        while ((read = source.read(buf)) != -1) {
+            cos.write(buf, 0, read);
+        }
+        source.close();
+        destination.flush();
+        cos.close();
     }
 
     public String getKryptifiedDirectory() throws IOException {
@@ -147,9 +175,14 @@ public class VideoEncryptionHandler {
         return Environment.MEDIA_MOUNTED.equals(state);
     }
 
+    public boolean isVideoInPathEncrypted(String path) {
+        Realm realm = Realm.getDefaultInstance();
+        EncryptedVideo video = realm.where(EncryptedVideo.class).equalTo("originalPath", path).findFirst();
+        return video == null;
+    }
+
     public interface EncryptionHandler {
         void onVideoEncrypted(EncryptedVideo encryptedVideo);
-
         void onVideoDecrypted(Video video);
     }
 }
